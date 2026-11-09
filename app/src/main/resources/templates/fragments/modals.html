@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Parameters modal -->
+    <div th:fragment="parametrosModal" class="modal fade" id="parametrosModal" tabindex="-1" aria-labelledby="parametrosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="parametrosModalLabel" th:text="#{label.parametros}" />
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" th:aria-label="#{label.cerrar}"></button>
+                </div>
+                <div class="modal-body table-responsive mt-2">
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th th:text="#{parametros.id}" />
+                            <th th:text="#{parametros.idEvento}" />
+                            <th th:text="#{parametros.nh3}" />
+                            <th th:text="#{parametros.no2}" />
+                            <th th:text="#{parametros.no3}" />
+                            <th th:text="#{parametros.ph}" />
+                            <th th:text="#{parametros.kh}" />
+                            <th th:text="#{parametros.gh}" />
+                        </tr>
+                        </thead>
+                        <tbody id="parametrosTableBody">
+                        </tbody>
+                    </table>
+
+
+                    <nav th:aria-label="#{modal.parametros.pagination}">
+                        <ul class="pagination justify-content-center" id="parametrosPagination">
+                        </ul>
+                    </nav>
+                    <p class="text-center"><span th:text="#{modal.parametros.total}"  /><span id="parametrosTotalElements" class="badge bg-primary">0</span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div th:fragment="modalEvento" class="modal fade" id="eventoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        <span id="modal-icon" style="font-size:1.4rem;"></span>
+                        <span id="modal-type" class="text-capitalize"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Single date (when there is only one event) -->
+                    <ul class="list-group list-group-flush" id="modal-single">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted" th:text="#{modal.eventos.inicio}" />
+                            <strong id="modal-start"></strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted" th:text="#{modal.eventos.fin}" />
+                            <strong id="modal-end"></strong>
+                        </li>
+                        <!-- Datos co2Tratamiento para evento individual -->
+                        <li class="list-group-item d-flex justify-content-between" id="modal-co2Tratamiento-row" style="display:none!important;">
+                            <span class="text-muted" th:text="#{modal.eventos.producto}" />
+                            <strong id="modal-co2Tratamiento-product"></strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" id="modal-co2Tratamiento-value-row" style="display:none!important;">
+                            <span class="text-muted" th:text="#{modal.eventos.cantidad}" />
+                            <strong id="modal-co2Tratamiento-value"></strong>
+                        </li>
+                    </ul>
+
+                    <!-- Grouped list (when there is more than one event) -->
+                    <div id="modal-items" style="display:none;">
+                        <p class="text-muted small mb-1" th:text="#{modal.eventos.dia}" />
+                        <ul id="modal-items-list" class="list-group list-group-flush"></ul>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Add information modal -->
+    <div th:fragment="modalAddInfo" class="modal fade" id="infoAddModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i> <span th:text="#{menu.add.info}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="info-fecha-label"></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{modal.info.type}" />
+                        <select class="form-select" id="info-type">
+                            <option value="info" th:text="#{modal.info.info}" />
+                            <option value="fish" th:text="#{modal.info.peces}" />
+                            <option value="plants" th:text="#{modal.info.plantas}" />
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{modal.info.status}" />
+                        <input type="text" class="form-control" id="info-status" th:placeholder="#{modal.info.status.placeholder}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{modal.info.observation}" />
+                        <textarea class="form-control" id="info-observation" rows="3" th:placeholder="#{modal.info.observation.placeholder}"></textarea>
+                    </div>
+                    <div id="info-feedback" class="alert d-none mt-2" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cancelar}" />
+                    <button type="button" class="btn btn-primary" id="btn-guardar-info">
+                        <span id="btn-info-txt" th:text="#{label.guardar}" />
+                        <span id="btn-info-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- View daily information modal -->
+    <div th:fragment="infoDia" class="modal fade" id="infoViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i> <span th:text="#{modal.info}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="info-view-fecha"></p>
+
+                    <div id="info-view-spinner" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+
+                    <div id="info-view-content" class="d-none">
+                        <!-- Grupo: Info general -->
+                        <div id="info-group-info" class="mb-3 d-none">
+                            <h6 class="fw-semibold text-secondary mb-2"><i class="bi bi-info-circle"></i> <span th:text="#{modal.info.general}" /></h6>
+                            <ul id="info-list-info" class="list-group list-group-flush mb-2"></ul>
+                        </div>
+                        <!-- Grupo: Peces -->
+                        <div id="info-group-fish" class="mb-3 d-none">
+                            <h6 class="fw-semibold text-secondary mb-2"><i class="bi bi-water"></i> <span th:text="#{modal.info.peces}" /></h6>
+                            <ul id="info-list-fish" class="list-group list-group-flush mb-2"></ul>
+                        </div>
+                        <!-- Grupo: Plantas -->
+                        <div id="info-group-plants" class="mb-3 d-none">
+                            <h6 class="fw-semibold text-secondary mb-2"><i class="bi bi-tree"></i> <span th:text="#{modal.info.plantas}" /></h6>
+                            <ul id="info-list-plants" class="list-group list-group-flush mb-2"></ul>
+                        </div>
+                    </div>
+
+                    <div id="info-view-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add maintenance modal -->
+    <div th:fragment="addMantenimiento" class="modal fade" id="maintenanceAddModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-tools me-2"></i> <span th:text="#{menu.add.mantenimiento}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="maintenance-date-label"></p>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold" th:text="#{modal.mantenimiento.agua}"></label>
+                            <input type="number" min="0" step="1" class="form-control" id="mant-water" th:placeholder="#{modal.mantenimiento.water.placeholder}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold" th:text="#{modal.mantenimiento.prime}"></label>
+                            <input type="number" min="0" step="0.01" class="form-control" id="mant-prime" th:placeholder="#{modal.mantenimiento.prime.placeholder}">
+                        </div>
+                        <div class="col-6 d-flex align-items-end">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="mant-glass">
+                                <label class="form-check-label fw-semibold" for="mant-glass" th:text="#{modal.mantenimiento.cristales}"></label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold" th:text="#{modal.mantenimiento.poda}"></label>
+                            <input type="text" class="form-control" id="mant-pruning" maxlength="255" th:placeholder="#{modal.mantenimiento.pruning.placeholder}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" th:text="#{modal.mantenimiento.observaciones}"></label>
+                            <textarea class="form-control" id="mant-observations" rows="2" th:placeholder="#{modal.mantenimiento.observaciones.placeholder}"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-outline-secondary btn-sm w-100 d-flex justify-content-between align-items-center"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#filtro1-collapse">
+                                <span th:text="#{modal.mantenimiento.filtro1}"></span> <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="collapse mt-2" id="filtro1-collapse">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f1-perlon"><label class="form-check-label" for="f1-perlon" th:text="#{js.label.perlon}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f1-sponge"><label class="form-check-label" for="f1-sponge" th:text="#{js.label.esponja}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f1-bio"><label class="form-check-label" for="f1-bio" th:text="#{js.label.biologico}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f1-mech"><label class="form-check-label" for="f1-mech" th:text="#{js.label.mecanico}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f1-biomech"><label class="form-check-label" for="f1-biomech" th:text="#{js.label.bioMeca}"></label></div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <button class="btn btn-outline-secondary btn-sm w-100 d-flex justify-content-between align-items-center"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#filtro2-collapse">
+                                <span th:text="#{modal.mantenimiento.filtro2}"></span> <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="collapse mt-2" id="filtro2-collapse">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f2-perlon"><label class="form-check-label" for="f2-perlon" th:text="#{js.label.perlon}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f2-sponge"><label class="form-check-label" for="f2-sponge" th:text="#{js.label.esponja}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f2-bio"><label class="form-check-label" for="f2-bio" th:text="#{js.label.biologico}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f2-mech"><label class="form-check-label" for="f2-mech" th:text="#{js.label.mecanico}"></label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" id="f2-biomech"><label class="form-check-label" for="f2-biomech" th:text="#{js.label.bioMeca}"></label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="maintenance-feedback" class="alert d-none mt-3" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cancelar}" />
+                    <button type="button" class="btn btn-primary" id="btn-save-maintenance">
+                        <span id="btn-mant-txt" th:text="#{label.guardar}" />
+                        <span id="btn-mant-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View maintenance modal -->
+    <div th:fragment="modalMantenimiento" class="modal fade" id="maintenanceViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-tools me-2"></i><span  th:text="#{modal.mantenimiento}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="mant-view-fecha"></p>
+
+                    <div id="mant-view-spinner" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+
+                    <ul class="list-group list-group-flush d-none" id="mant-view-content">
+                        <li class="list-group-item d-flex justify-content-between" id="mant-view-water-row">
+                            <span class="text-muted"><i class="bi bi-droplet"></i> <span th:text="#{modal.mantenimiento.agua}"></span></span>
+                            <strong id="mant-view-water">-</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" id="mant-view-prime-row">
+                            <span class="text-muted"><i class="bi bi-flask"></i> <span th:text="#{modal.mantenimiento.prime}"></span></span>
+                            <strong id="mant-view-prime">-</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span class="text-muted"><i class="bi bi-transparency"></i> <span th:text="#{modal.mantenimiento.cristales}"></span></span>
+                            <strong id="mant-view-glass">-</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" id="mant-view-pruning-row">
+                            <span class="text-muted"><i class="bi bi-scissors"></i> <span th:text="#{modal.mantenimiento.poda}"></span></span>
+                            <strong id="mant-view-pruning">-</strong>
+                        </li>
+                        <li class="list-group-item" id="mant-view-obs-row">
+                            <span class="text-muted"><i class="bi bi-chat-left-text"></i> <span th:text="#{modal.mantenimiento.observaciones}"></span></span>
+                            <p class="small mb-0 mt-1" id="mant-view-observations">-</p>
+                        </li>
+                        <li class="list-group-item" id="mant-view-filter1-row">
+                            <span class="text-muted"><i class="bi bi-funnel"></i> <span th:text="#{modal.mantenimiento.filtro1}"></span></span>
+                            <p class="small mb-0 mt-1" id="mant-view-filter1">-</p>
+                        </li>
+                        <li class="list-group-item" id="mant-view-filter2-row">
+                            <span class="text-muted"><i class="bi bi-funnel"></i> <span th:text="#{modal.mantenimiento.filtro2}"></span></span>
+                            <p class="small mb-0 mt-1" id="mant-view-filter2">-</p>
+                        </li>
+                    </ul>
+
+                    <div id="mant-view-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" id="btn-delete-maintenance">
+                        <i class="bi bi-trash"></i> <span th:text="#{label.borrar}" />
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View parameters modal -->
+    <div th:fragment="modalParametros" class="modal fade" id="parametrosViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-sliders me-2"></i><span  th:text="#{label.parametros}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="param-view-fecha"></p>
+
+                    <!-- Spinner mientras carga -->
+                    <div id="param-view-spinner" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+
+                    <!-- Contenido -->
+                    <table class="table table-bordered table-sm text-center d-none" id="param-view-content">
+                        <thead class="table-light">
+                        <tr>
+                            <th><span  th:text="#{parametros.nh3}" /></th>
+                            <th><span  th:text="#{parametros.no2}" /></th>
+                            <th><span  th:text="#{parametros.no3}" /></th>
+                            <th><span  th:text="#{parametros.ph}" /></th>
+                            <th><span  th:text="#{parametros.kh}" /></th>
+                            <th><span  th:text="#{parametros.gh}" /></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td id="pv-nh3">-</td>
+                            <td id="pv-no2">-</td>
+                            <td id="pv-no3">-</td>
+                            <td id="pv-ph">-</td>
+                            <td id="pv-kh">-</td>
+                            <td id="pv-gh">-</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Error -->
+                    <div id="param-view-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" id="btn-borrar-parametro">
+                        <i class="bi bi-trash"></i> <span  th:text="#{label.borrar}" />
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add treatment modal -->
+    <div th:fragment="addTratamiento" class="modal fade" id="tratamientoModal" tabindex="-1" aria-labelledby="tratamientoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tratamientoModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i> <span  th:text="#{menu.add.tratamiento}" />
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="tratamiento-fecha-label"></p>
+                    <div class="mb-3">
+                        <label for="tratamiento-nombre" class="form-label fw-semibold"  th:text="#{modal.tratamiento.nombre}" />
+                        <input type="text" class="form-control" id="tratamiento-nombre" required maxlength="100" th:placeholder="#{modal.tratamiento.nombre.placeholder}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="tratamiento-valor" class="form-label fw-semibold"  th:text="#{modal.tratamiento.valor}" />
+                        <input type="text" class="form-control" id="tratamiento-valor" required maxlength="50" th:placeholder="#{modal.tratamiento.valor.placeholder}">
+                    </div>
+                    <div id="tratamiento-feedback" class="alert d-none" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  th:text="#{label.cancelar}" />
+                    <button type="button" class="btn btn-primary" id="btn-guardar-tratamiento">
+                        <span id="btn-guardar-txt"  th:text="#{label.guardar}" />
+                        <span id="btn-guardar-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add parameters modal -->
+    <div th:fragment="addParametro" class="modal fade" id="parametrosAddModal" tabindex="-1" aria-labelledby="parametrosAddModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="parametrosAddModalLabel">
+                        <i class="bi bi-sliders me-2"></i> <span  th:text="#{modal.parametros.add}" />
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="parametros-fecha-label"></p>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.nh3}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-nh3">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.no2}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-no2">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.no3}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-no3">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.ph}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-ph">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.kh}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-kh">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.gh}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-gh">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold"  th:text="#{parametros.temp}" />
+                            <input type="number" step="any" class="form-control parameter-value" id="param-temp">
+                        </div>
+                    </div>
+                    <div id="parametros-feedback" class="alert d-none mt-3" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  th:text="#{label.cancelar}" />
+                    <button type="button" class="btn btn-primary" id="btn-guardar-parametros">
+                        <span id="btn-param-txt"  th:text="#{label.guardar}" />
+                        <span id="btn-param-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameter ranges modal -->
+    <div th:fragment="parametrosRange" class="modal fade" id="parametersModal" tabindex="-1" aria-labelledby="parametersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="parametersModalLabel"  th:text="#{modal.parametros.rango}" />
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="prange-spinner" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                    <div class="table-responsive d-none" id="prange-table-wrap">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th  th:text="#{label.parametros}" />
+                                <th  th:text="#{modal.parametros.editar.lvl1}" />
+                                <th  th:text="#{modal.parametros.editar.lvl2}" />
+                                <th  th:text="#{modal.parametros.editar.lvl3}" ><small class="text-muted" th:text="#{modal.parametros.editar.lvl3.des}" /></th>
+                                <th  th:text="#{modal.parametros.editar.lvl4}" />
+                                <th  th:text="#{modal.parametros.editar.lvl5}" />
+                                <th  th:text="#{modal.parametros.editar.valor}" />
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="prange-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div id="prange-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-success" id="btn-nuevo-prange">
+                        <i class="bi bi-plus-circle me-1"></i><span th:text="#{label.nueva}"></span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit / create range modal -->
+    <div th:fragment="paramRangeEditModal" class="modal fade" id="paramRangeEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-sliders me-2"></i>
+                        <span id="prange-edit-label" th:text="#{modal.parametros.editar}" />
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="prange-id">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{label.parametros}"></label>
+                        <input type="text" class="form-control" id="prange-parameter" required maxlength="100" th:placeholder="#{modal.parametros.placeholder.parameter}">
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-semibold"  th:text="#{modal.parametros.editar.lvl1}" ><small class="text-muted" th:text="#{modal.parametros.editar.lvl1.des}" /></label>
+                            <input type="number" step="0.01" class="form-control" id="prange-level1">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-semibold" th:text="#{modal.parametros.editar.lvl2}" ><small class="text-muted" th:text="#{modal.parametros.editar.lvl2.des}" /></label>
+                            <input type="number" step="0.01" class="form-control" id="prange-level2">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-semibold" th:text="#{modal.parametros.editar.lvl3}" ><small class="text-muted" th:text="#{modal.parametros.editar.lvl3.des}" /></label>
+                            <input type="number" step="0.01" class="form-control" id="prange-level3">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-semibold" th:text="#{modal.parametros.editar.lvl4}" ><small class="text-muted" th:text="#{modal.parametros.editar.lvl4.des}" /></label>
+                            <input type="number" step="0.01" class="form-control" id="prange-level4">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-semibold" th:text="#{modal.parametros.editar.lvl5}" ><small class="text-muted" th:text="#{modal.parametros.editar.lvl5.des}" /></label>
+                            <input type="number" step="0.01" class="form-control" id="prange-level5">
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <label class="form-label fw-semibold"  th:text="#{modal.parametros.editar.valor}" />
+                            <input type="text" class="form-control" id="prange-unit" maxlength="50" th:placeholder="#{modal.parametros.placeholder.unit}">
+                        </div>
+                    </div>
+                    <div id="prange-feedback" class="alert d-none mt-3" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                    <button type="button" class="btn btn-primary" id="btn-guardar-prange">
+                        <span id="btn-prange-txt" th:text="#{label.guardar}" />
+                        <span id="btn-prange-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Listado Notificaciones -->
+    <div th:fragment="notificationsModal" class="modal fade" id="notificationsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" th:text="#{modal.notificaciones}" />
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notif-spinner" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                    <div class="table-responsive d-none" id="notif-table-wrap">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                            <tr>
+                                <th th:text="#{modal.notificaciones.parametros}"></th>
+                                <th th:text="#{modal.notificaciones.dias}"></th>
+                                <th th:text="#{label.activa}"></th>
+                                <th th:text="#{modal.notificaciones.creacion}"></th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="notif-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div id="notif-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-success" id="btn-nuevo-notif">
+                        <i class="bi bi-plus-circle me-1"></i> <span th:text="#{label.nueva}" />
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit / create notification modal -->
+    <div th:fragment="notifEditModal" class="modal fade" id="notifEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-bell me-2"></i>
+                        <span id="notif-edit-label" th:text="#{js.label.editNotification}" />
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="notif-id">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{label.parametros}" />
+                        <input type="text" class="form-control" id="notif-parameter" required maxlength="100" th:placeholder="#{modal.notificaciones.placeholder.parameter}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{modal.notificacion.dias}" />
+                        <input type="number" class="form-control" id="notif-value" required min="1" step="1" th:placeholder="#{modal.notificaciones.placeholder.days}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold d-block" th:text="#{modal.notificacion.dias.semana}" />
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-0" data-bit="1">
+                                <label class="form-check-label" for="wd-0" th:text="#{modal.notificacion.dias.semana.lunes}" />
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-1" data-bit="2">
+                                <label class="form-check-label" for="wd-1"  th:text="#{modal.notificacion.dias.semana.martes}" />
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-2" data-bit="4">
+                                <label class="form-check-label" for="wd-2" th:text="#{modal.notificacion.dias.semana.miercoles}" />
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-3" data-bit="8">
+                                <label class="form-check-label" for="wd-3" th:text="#{modal.notificacion.dias.semana.jueves}" />
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-4" data-bit="16">
+                                <label class="form-check-label" for="wd-4" th:text="#{modal.notificacion.dias.semana.viernes}" />
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-5" data-bit="32">
+                                <label class="form-check-label" for="wd-5" th:text="#{modal.notificacion.dias.semana.sabado}" />
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input notif-weekday" type="checkbox" id="wd-6" data-bit="64">
+                                <label class="form-check-label" for="wd-6" th:text="#{modal.notificacion.dias.semana.domingo}" />
+                            </div>
+                        </div>
+                        <small class="text-muted" th:text="#{modal.notificacion.footer}" />
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="notif-active" checked>
+                        <label class="form-check-label fw-semibold" for="notif-active" th:text="#{label.activa}" />
+                    </div>
+                    <div id="notif-feedback" class="alert d-none mt-2" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cancelar}" />
+                    <button type="button" class="btn btn-primary" id="btn-guardar-notif">
+                        <span id="btn-notif-txt" th:text="#{label.guardar}" />
+                        <span id="btn-notif-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View daily photos modal -->
+    <div th:fragment="fotoModal" class="modal fade" id="photoViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-camera me-2"></i><span th:text="#{modal.foto.actual}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="photo-view-fecha"></p>
+
+                    <div id="photo-view-spinner" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+
+                    <div id="photo-carousel-wrap" class="d-none">
+                        <div id="photoCarousel" class="carousel slide" data-bs-ride="false">
+                            <div class="carousel-inner" id="photo-carousel-inner"></div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+                        <p class="text-center text-muted small mt-2" id="photo-counter"></p>
+                    </div>
+
+                    <div id="photo-view-empty" class="text-center text-muted d-none" th:text="#{modal.foto.sin}" />
+                    <div id="photo-view-error" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-danger" id="btn-borrar-foto">
+                        <i class="bi bi-trash"></i> <span th:text="#{modal.foto.borrar}" />
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cerrar}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Subir Foto -->
+    <div  th:fragment="fotoAddModal" class="modal fade" id="photoAddModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-camera me-2"></i><span th:text="#{menu.add.foto}" /></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="photo-fecha-label"></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" th:text="#{modal.foto.label}">Foto</label>
+                        <input type="file" class="form-control" id="photo-file" accept="image/*" required>
+                    </div>
+                    <!-- Preview -->
+                    <img id="photo-preview" src="" th:alt="#{modal.foto.preview.alt}" class="img-fluid rounded d-none mb-2" style="max-height:200px;">
+                    <div id="photo-feedback" class="alert d-none mt-2" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"th:text="#{label.cancelar}" />
+                    <button type="button" class="btn btn-primary" id="btn-guardar-photo">
+                        <span id="btn-photo-txt" th:text="#{label.guardar}" />
+                        <span id="btn-photo-spinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:fragment="historyExportModal" class="modal fade" id="history-export-modal" tabindex="-1"
+         aria-labelledby="history-export-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <form id="history-export-form" method="get">
+                    <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="history-export-title"
+                            th:text="#{historyExport.title}">Descargar historial</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                th:aria-label="#{label.cerrar}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <fieldset class="mb-3">
+                            <legend class="form-label fs-6" th:text="#{historyExport.format}">Formato</legend>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format"
+                                           id="history-export-csv" value="csv" checked>
+                                    <label class="form-check-label" for="history-export-csv">CSV</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="format"
+                                           id="history-export-md" value="md">
+                                    <label class="form-check-label" for="history-export-md">Markdown</label>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="history-export-all" checked>
+                            <label class="form-check-label" for="history-export-all"
+                                   th:text="#{historyExport.allHistory}">Todo el historial</label>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label class="form-label" for="history-export-start"
+                                       th:text="#{historyExport.startDate}">Fecha de inicio</label>
+                                <input class="form-control" type="date" id="history-export-start" disabled>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" for="history-export-end"
+                                       th:text="#{historyExport.endDate}">Fecha de fin</label>
+                                <input class="form-control" type="date" id="history-export-end" disabled>
+                            </div>
+                        </div>
+                        <fieldset>
+                            <legend class="form-label fs-6" th:text="#{historyExport.sections}">Datos que incluir</legend>
+                            <div class="row g-2">
+                                <div class="col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input history-export-section" type="checkbox"
+                                               id="history-export-events" value="events" checked>
+                                        <label class="form-check-label" for="history-export-events"
+                                               th:text="#{historyExport.section.events}">Eventos</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input history-export-section" type="checkbox"
+                                               id="history-export-parameters" value="parameters" checked>
+                                        <label class="form-check-label" for="history-export-parameters"
+                                               th:text="#{historyExport.section.parameters}">Parámetros</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input history-export-section" type="checkbox"
+                                               id="history-export-information" value="information" checked>
+                                        <label class="form-check-label" for="history-export-information"
+                                               th:text="#{historyExport.section.information}">Información</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input history-export-section" type="checkbox"
+                                               id="history-export-maintenance" value="maintenance" checked>
+                                        <label class="form-check-label" for="history-export-maintenance"
+                                               th:text="#{historyExport.section.maintenance}">Mantenimientos y filtros</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input history-export-section" type="checkbox"
+                                               id="history-export-co2" value="co2" checked>
+                                        <label class="form-check-label" for="history-export-co2"
+                                               th:text="#{historyExport.section.co2}">Tratamientos CO2</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div id="history-export-feedback" class="alert alert-danger d-none mt-3 mb-0"
+                             role="alert"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                th:text="#{label.cancelar}">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="history-export-submit">
+                            <span id="history-export-download-label"
+                                  th:text="#{historyExport.download}">Descargar</span>
+                            <span id="history-export-spinner"
+                                  class="spinner-border spinner-border-sm d-none ms-1" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar context menu -->
+    <div th:fragment="menuCalendar" id="cal-context-menu">
+        <div class="ctx-item" id="ctx-add-reminder">
+            <i class="bi bi-bell"></i> <span th:text="#{task.createReminder}" />
+        </div>
+        <div class="ctx-item" id="ctx-add-tratamiento">
+            <i class="bi bi-plus-circle"></i> <span th:text="#{menu.add.tratamiento}" />
+        </div>
+        <div class="ctx-item" id="ctx-add-parameters">
+            <i class="bi bi-sliders"></i> <span th:text="#{menu.add.parametros}" />
+        </div>
+        <div class="ctx-item" id="ctx-add-maintenance">
+            <i class="bi bi-tools"></i> <span th:text="#{menu.add.mantenimiento}" />
+        </div>
+        <div class="ctx-item" id="ctx-add-info">
+            <i class="bi bi-info-circle"></i> <span th:text="#{menu.add.info}" />
+        </div>
+        <div class="ctx-item" id="ctx-add-life">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">
+                <path d="M3 12c2.2-3.1 5.2-4.7 9-4.7 2.4 0 4.5.8 6.4 2.3L22 7v10l-3.6-2.6c-1.9 1.5-4 2.3-6.4 2.3-3.8 0-6.8-1.6-9-4.7Zm7.1-1.3a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/>
+            </svg>
+            <span th:text="#{life.add}" />
+        </div>
+        <div class="ctx-item" id="ctx-add-photo">
+            <i class="bi bi-camera"></i> <span th:text="#{menu.add.foto}" />
+        </div>
+    </div>
+
+</body>
+</html>

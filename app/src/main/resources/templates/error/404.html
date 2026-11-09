@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/error-page :: head(#{error.page.notFound.title})}"></head>
+<body>
+<div th:replace="~{fragments/static :: header}"></div>
+<main th:replace="~{fragments/error-page :: content(404, #{error.page.notFound.title}, #{error.page.notFound.description})}"></main>
+<div th:replace="~{fragments/static :: footer}"></div>
+</body>
+</html>

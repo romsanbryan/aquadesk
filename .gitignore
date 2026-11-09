@@ -1,0 +1,74 @@
+# macOS / Windows
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# IDEs and editors
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+.factorypath
+.springBeans
+.sts4-cache/
+.apt_generated/
+*.swp
+*.swo
+*~
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+application-local.properties
+application-loca.properties
+application-local.yml
+application-local.yaml
+*.local.properties
+
+# Runtime output and local databases
+**/target/
+*.log
+*.log.*
+logs/
+*.pid
+*.seed
+*.db
+*.sqlite
+*.sqlite3
+*.mv.db
+*.trace.db
+
+# Local database exports; keep db/db.sql as the versioned schema
+db/dumps/
+*.local.sql
+*.dump
+*.sql.gz
+*.sql.zip
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Project-specific exclusion
+HELP.md
+
+# Local deployment and build-wrapper files intentionally excluded from the repository
+/deploy.sh
+/deployment-guide.md
+/mvnw
+/.mvn/
+
+# Local/project files intentionally excluded from the repository
+/.gitattributes
+/.github/copilot-instructions.md
+/Dockerfile

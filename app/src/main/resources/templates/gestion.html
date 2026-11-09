@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+
+<th:block th:replace="~{fragments/static :: header-scripts}"></th:block>
+<th:block th:replace="~{fragments/static :: style}"></th:block>
+
+<body>
+<div th:replace="~{fragments/static :: header}"></div>
+
+<div th:replace="~{fragments/modals :: modalEvento}"></div>
+<div th:replace="~{fragments/modals :: modalAddInfo}"></div>
+<div th:replace="~{fragments/modals :: infoDia}"></div>
+<div th:replace="~{fragments/modals :: addMantenimiento}"></div>
+<div th:replace="~{fragments/modals :: modalMantenimiento}"></div>
+<div th:replace="~{fragments/modals :: modalParametros}"></div>
+<div th:replace="~{fragments/modals :: addTratamiento}"></div>
+<div th:replace="~{fragments/modals :: addParametro}"></div>
+<div th:replace="~{fragments/modals :: parametrosRange}"></div>
+<div th:replace="~{fragments/modals :: paramRangeEditModal}"></div>
+<div th:replace="~{fragments/modals :: notificationsModal}"></div>
+<div th:replace="~{fragments/modals :: notifEditModal}"></div>
+<div th:replace="~{fragments/modals :: fotoModal}"></div>
+<div th:replace="~{fragments/modals :: fotoAddModal}"></div>
+<div th:replace="~{fragments/modals :: menuCalendar}"></div>
+<div th:replace="~{fragments/modals :: parametrosModal}"></div>
+<div th:replace="~{fragments/modals :: historyExportModal}"></div>
+<div class="modal fade" id="life-list-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" th:text="#{life.title}">Vida del acuario</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <div class="modal-body">
+                <div id="life-list-error" class="alert alert-danger d-none" role="alert"></div>
+                <div id="life-list" class="row g-3" aria-live="polite">
+                    <p class="text-muted" th:text="#{life.loading}">Cargando vida...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        th:text="#{label.cerrar}">Cerrar
+                </button>
+                <button type="button" class="btn btn-primary" id="life-open-create"
+                        th:text="#{life.add}">Registrar pez o planta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="life-create-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form id="life-create-form">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" th:text="#{life.add}">Registrar pez o planta</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            th:aria-label="#{label.cerrar}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="life-category" th:text="#{life.category}">Tipo</label>
+                            <select class="form-select" id="life-category" name="category" required>
+                                <option value="fish" th:text="#{life.fish}">Pez</option>
+                                <option value="plant" th:text="#{life.plant}">Planta</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="life-quantity" th:text="#{life.quantity}">Cantidad</label>
+                            <input class="form-control" id="life-quantity" name="quantity"
+                                   type="number" min="1" step="1" value="1" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="life-date" th:text="#{task.actionDate}">Fecha</label>
+                            <input class="form-control" id="life-date" name="date" type="date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="life-common-name" th:text="#{life.commonName}">Nombre
+                                común</label>
+                            <input class="form-control" id="life-common-name" name="commonName"
+                                   maxlength="150" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="life-scientific-name" th:text="#{life.scientificName}">Nombre
+                                científico</label>
+                            <input class="form-control" id="life-scientific-name" name="scientificName" maxlength="150">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="life-recommended-parameters"
+                                   th:text="#{life.recommendedParameters}">Parámetros recomendados</label>
+                            <textarea class="form-control" id="life-recommended-parameters"
+                                      name="recommendedParameters" maxlength="4000" rows="2"></textarea>
+                            <div class="form-text" th:text="#{life.recommendedParametersHelp}"></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="life-technical-sheet-url"
+                                   th:text="#{life.technicalSheetUrl}">Ficha técnica (enlace web o PDF)</label>
+                            <input class="form-control" id="life-technical-sheet-url" name="technicalSheetUrl"
+                                   type="url" maxlength="2048" placeholder="https://...">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="life-notes" th:text="#{life.notes}">Notas</label>
+                            <textarea class="form-control" id="life-notes" name="notes" maxlength="4000"
+                                      rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div id="life-create-error" class="alert alert-danger d-none mt-3 mb-0" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            th:text="#{label.cancelar}">Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" th:text="#{label.guardar}">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/static :: footer}"></div>
+
+<div class="container-fluid mt-4 px-4 pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <button type="button" class="btn btn-outline-success" id="life-open-button"
+                th:aria-label="#{life.open}" th:title="#{life.open}">
+            <span th:text="#{life.open}">Ver vida</span>
+        </button>
+        <div class="dropdown ms-auto">
+            <button class="btn btn-primary dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"
+                    th:aria-label="#{header.configuration}"
+                    th:title="#{header.configuration}">
+                <i class="bi bi-gear" aria-hidden="true"></i>
+                <span class="visually-hidden" th:text="#{header.configuration}">Configuración</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                       data-bs-target="#parametersModal"
+                       th:text="#{label.parametros}">
+                        Parámetros
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                       data-bs-target="#notificationsModal"
+                       th:text="#{modal.notificaciones}">
+                        Notificaciones
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                       data-bs-target="#task-create-modal" th:text="#{task.createReminder}">
+                        Crear recordatorio
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div id="calendar"></div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body p-2">
+                    <h5 class="card-title" th:text="#{events.proximos}"></h5>
+                    <div id="proximos-eventos-list">
+                        <p class="text-muted small mb-0" th:text="#{events.noEvent}"></p>
+                    </div>
+                    <button type="button" class="btn btn-link btn-sm px-0 mt-2"
+                            data-bs-toggle="modal" data-bs-target="#upcomingEventsModal"
+                            th:text="#{events.viewAll}">Ver todos
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal fade" id="upcomingEventsModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title fs-5" th:text="#{events.proximos}">Próximos eventos</h2>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    th:aria-label="#{label.cerrar}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <h3 class="h6" th:text="#{events.proximos}">Próximos eventos</h3>
+                            <div id="upcoming-events-full-list" class="mb-4" aria-live="polite">
+                                <p class="text-muted small mb-0" th:text="#{events.loading}">Cargando eventos...</p>
+                            </div>
+                            <h3 class="h6 mb-2" th:text="#{task.title}">Recordatorios y tareas</h3>
+                            <div id="aquarium-task-list" aria-live="polite">
+                                <p class="text-muted small mb-0" th:text="#{task.loading}">Cargando tareas...</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    th:text="#{label.cerrar}">Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0" th:text="#{label.parametros}"></h5>
+                        <div id="parametros-estado"></div>
+                    </div>
+                    <div class="table-responsive mt-2">
+                        <table class="table table-stripedx">
+                            <thead>
+                            <tr>
+                                <th th:text="#{parametros.nh3}"></th>
+                                <th th:text="#{parametros.no2}"></th>
+                                <th th:text="#{parametros.no3}"></th>
+                                <th th:text="#{parametros.ph}"></th>
+                                <th th:text="#{parametros.kh}"></th>
+                                <th th:text="#{parametros.gh}"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td id="pl-nh3">-</td>
+                                <td id="pl-no2">-</td>
+                                <td id="pl-no3">-</td>
+                                <td id="pl-ph">-</td>
+                                <td id="pl-kh">-</td>
+                                <td id="pl-gh">-</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#parametrosModal"
+                            th:text="#{label.todo}"></button>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0" th:text="#{mantenimiento.ultimo}"></h5>
+                        <span class="small text-muted" id="maintenance-last-date">-</span>
+                    </div>
+                    <div id="maintenance-last-content">
+                        <p class="text-muted small mb-0" th:text="#{mantenimiento.vacio}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-2" th:text="#{photo.last}"/>
+                    <div id="lastPhotosCarousel" class="carousel slide" data-bs-ride="false">
+                        <div class="carousel-inner" id="last-photos-inner">
+                        </div>
+                        <button class="carousel-control-prev" type="button" id="last-photos-prev"
+                                data-bs-target="#lastPhotosCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden" th:text="#{label.anterior}"/>
+                        </button>
+                        <button class="carousel-control-next" type="button" id="last-photos-next"
+                                data-bs-target="#lastPhotosCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden" th:text="#{label.siguiente}"/>
+                        </button>
+                    </div>
+                    <div class="small text-muted mt-1"><span id="last-photos-counter">0 / 0</span></div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="task-create-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="task-create-form" method="post">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" th:text="#{task.createReminder}">Crear recordatorio</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            th:aria-label="#{label.cerrar}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="task-title" th:text="#{task.name}">Tarea</label>
+                        <input class="form-control" id="task-title" name="title" required maxlength="150">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="task-action-date" th:text="#{task.actionDate}">Fecha de
+                            actuación</label>
+                        <input class="form-control" id="task-action-date" name="actionDate" type="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="task-event-type" th:text="#{task.eventType}">Tipo de
+                            evento</label>
+                        <select class="form-select" id="task-event-type" name="eventType" required>
+                            <option value="info" th:text="#{task.event.info}">Información</option>
+                            <option value="live" th:text="#{task.event.live}">Peces o plantas</option>
+                            <option value="manteiment" th:text="#{task.event.maintenance}">Mantenimiento</option>
+                            <option value="parameters" th:text="#{task.event.parameters}">Parámetros</option>
+                            <option value="co2" th:text="#{task.event.co2}">Tratamiento CO₂</option>
+                            <option value="photo" th:text="#{task.event.photo}">Foto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="task-description"
+                               th:text="#{task.description}">Descripción</label>
+                        <textarea class="form-control" id="task-description" name="description" rows="3"
+                                  maxlength="2000"></textarea>
+                    </div>
+                    <div id="task-modal-feedback" class="alert d-none mt-3 mb-0" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            th:text="#{label.cancelar}">Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" th:text="#{task.add}">Añadir tarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="task-details-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="task-details-title"></h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <div class="modal-body">
+                <div id="task-details-view">
+                    <p><strong th:text="#{task.actionDate}">Fecha de actuación</strong>:
+                        <span id="task-details-date"></span></p>
+                    <p><strong th:text="#{task.eventType}">Tipo de evento</strong>:
+                        <span id="task-details-event-type"></span></p>
+                    <p id="task-details-description" class="mb-0"></p>
+                </div>
+                <form id="task-edit-form" class="d-none" method="post">
+                    <div class="mb-3">
+                        <label class="form-label" for="task-edit-title" th:text="#{task.name}">Tarea</label>
+                        <input class="form-control" id="task-edit-title" required maxlength="150">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="task-edit-date" th:text="#{task.actionDate}">Fecha de
+                            actuación</label>
+                        <input class="form-control" id="task-edit-date" type="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="task-edit-event-type" th:text="#{task.eventType}">Tipo de
+                            evento</label>
+                        <select class="form-select" id="task-edit-event-type" required>
+                            <option value="info" th:text="#{task.event.info}">Información</option>
+                            <option value="live" th:text="#{task.event.live}">Peces o plantas</option>
+                            <option value="manteiment" th:text="#{task.event.maintenance}">Mantenimiento</option>
+                            <option value="parameters" th:text="#{task.event.parameters}">Parámetros</option>
+                            <option value="co2" th:text="#{task.event.co2}">Tratamiento CO₂</option>
+                            <option value="photo" th:text="#{task.event.photo}">Foto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="task-edit-description"
+                               th:text="#{task.description}">Descripción</label>
+                        <textarea class="form-control" id="task-edit-description" rows="3" maxlength="2000"></textarea>
+                    </div>
+                </form>
+                <form id="task-completion-form" class="d-none" enctype="multipart/form-data">
+                    <p class="small text-muted" th:text="#{task.completionHelp}">
+                        Revisa y completa los datos que se guardarán en el historial.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label" for="task-completion-date" th:text="#{task.actionDate}">Fecha</label>
+                        <input class="form-control" id="task-completion-date" type="date" required>
+                    </div>
+                    <div class="task-completion-section d-none" data-event-type="info live">
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-info-type"
+                                   th:text="#{modal.info.type}">Tipo</label>
+                            <select class="form-select" id="task-completion-info-type">
+                                <option value="INFO" th:text="#{modal.info.info}">Info</option>
+                                <option value="FISH" th:text="#{modal.info.peces}">Peces</option>
+                                <option value="plants" th:text="#{modal.info.plantas}">Plantas</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-status"
+                                   th:text="#{modal.info.status}">Estado</label>
+                            <input class="form-control" id="task-completion-status" maxlength="50">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-observation"
+                                   th:text="#{modal.info.observation}">Observación</label>
+                            <textarea class="form-control" id="task-completion-observation" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="task-completion-section d-none" data-event-type="co2">
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-product"
+                                   th:text="#{modal.tratamiento.nombre}">Producto</label>
+                            <input class="form-control" id="task-completion-product" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-value" th:text="#{modal.tratamiento.valor}">Valor</label>
+                            <input class="form-control" id="task-completion-value" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="task-completion-section d-none" data-event-type="manteiment">
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-water" th:text="#{modal.mantenimiento.agua}">Agua
+                                cambiada</label>
+                            <input class="form-control" id="task-completion-water" type="number" min="0">
+                        </div>
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label class="form-label" for="task-completion-prime"
+                                       th:text="#{modal.mantenimiento.prime}">Prime</label>
+                                <input class="form-control" id="task-completion-prime" type="number" min="0" step="any">
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" id="task-completion-glass" type="checkbox">
+                            <label class="form-check-label" for="task-completion-glass"
+                                   th:text="#{modal.mantenimiento.cristales}">Cristales</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-pruning"
+                                   th:text="#{modal.mantenimiento.poda}">Poda</label>
+                            <textarea class="form-control" id="task-completion-pruning" maxlength="255"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="task-completion-maintenance-observations"
+                                   th:text="#{modal.mantenimiento.observaciones}">Observaciones</label>
+                            <textarea class="form-control" id="task-completion-maintenance-observations"
+                                      maxlength="500"></textarea>
+                        </div>
+                        <fieldset class="mb-3">
+                            <legend class="fs-6" th:text="#{task.filters}">Filtros</legend>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong th:text="#{modal.mantenimiento.filtro1}">Filtro 1</strong>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f1-sponge" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f1-sponge"
+                                               th:text="#{js.label.esponja}">Esponja</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f1-perlon" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f1-perlon"
+                                               th:text="#{js.label.perlon}">Perlón</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f1-mech" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f1-mech"
+                                               th:text="#{js.label.mecanico}">Mecánico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f1-bio" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f1-bio"
+                                               th:text="#{js.label.biologico}">Biológico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f1-bio-mech"
+                                               type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f1-bio-mech"
+                                               th:text="#{js.label.bioMeca}">Bio-mecánico</label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <strong th:text="#{modal.mantenimiento.filtro2}">Filtro 2</strong>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f2-sponge" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f2-sponge"
+                                               th:text="#{js.label.esponja}">Esponja</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f2-perlon" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f2-perlon"
+                                               th:text="#{js.label.perlon}">Perlón</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f2-mech" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f2-mech"
+                                               th:text="#{js.label.mecanico}">Mecánico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f2-bio" type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f2-bio"
+                                               th:text="#{js.label.biologico}">Biológico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="task-completion-f2-bio-mech"
+                                               type="checkbox">
+                                        <label class="form-check-label" for="task-completion-f2-bio-mech"
+                                               th:text="#{js.label.bioMeca}">Bio-mecánico</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="task-completion-section d-none" data-event-type="parameters">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-nh3"
+                                       th:text="#{parametros.nh3}">NH3</label>
+                                <input class="form-control" id="task-completion-nh3" type="number" step="any">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-no2"
+                                       th:text="#{parametros.no2}">NO2</label>
+                                <input class="form-control" id="task-completion-no2" type="number" step="any">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-no3"
+                                       th:text="#{parametros.no3}">NO3</label>
+                                <input class="form-control" id="task-completion-no3" type="number" step="any">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-ph" th:text="#{parametros.ph}">PH</label>
+                                <input class="form-control" id="task-completion-ph" type="number" step="any">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-kh" th:text="#{parametros.kh}">KH</label>
+                                <input class="form-control" id="task-completion-kh" type="number" step="any">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-gh" th:text="#{parametros.gh}">GH</label>
+                                <input class="form-control" id="task-completion-gh" type="number" step="any">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label" for="task-completion-temp" th:text="#{parametros.temp}">Temperature</label>
+                                <input class="form-control" id="task-completion-temp" type="number" step="any">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-completion-section d-none" data-event-type="photo">
+                        <label class="form-label" for="task-completion-photo" th:text="#{modal.foto.label}">Foto</label>
+                        <input class="form-control" id="task-completion-photo" type="file" accept="image/*">
+                    </div>
+                </form>
+                <div id="task-details-feedback" class="alert d-none mt-3 mb-0" role="alert"></div>
+            </div>
+            <div class="modal-footer">
+                <div id="task-details-actions" class="d-flex gap-2 w-100">
+                    <button type="button" class="btn btn-success" id="task-details-complete"
+                            th:text="#{task.markCompleted}">Finalizar
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="task-details-edit"
+                            th:text="#{task.edit}">Editar
+                    </button>
+                    <button type="button" class="btn btn-outline-danger ms-auto" id="task-details-delete"
+                            th:text="#{task.delete}">Borrar
+                    </button>
+                </div>
+                <div id="task-edit-actions" class="d-none d-flex gap-2 w-100">
+                    <button type="button" class="btn btn-secondary" id="task-edit-cancel"
+                            th:text="#{label.cancelar}">Cancelar
+                    </button>
+                    <button type="submit" form="task-edit-form" class="btn btn-primary"
+                            id="task-edit-submit"
+                            th:text="#{task.saveChanges}">Guardar cambios
+                    </button>
+                </div>
+                <div id="task-completion-actions" class="d-none gap-2 w-100">
+                    <button type="button" class="btn btn-secondary" id="task-completion-cancel"
+                            th:text="#{label.cancelar}">Cancelar
+                    </button>
+                    <button type="submit" form="task-completion-form" class="btn btn-success"
+                            id="task-completion-submit" th:text="#{task.markCompleted}">Finalizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+
+    window.appLocale = /*[[${#locale.language}]]*/ 'es';
+    window.aquariumId = /*[[${aquariumId}]]*/ null;
+    window.i18n = {
+        historyExport: {
+            dateRangeRequired: /*[[#{historyExport.dateRangeRequired}]]*/ 'Select both dates.',
+            invalidDateRange: /*[[#{historyExport.invalidDateRange}]]*/ 'The end date must be on or after the start date.',
+            downloadError: /*[[#{historyExport.downloadError}]]*/ 'Could not generate the file.',
+            selectSection: /*[[#{historyExport.selectSection}]]*/ 'Select at least one data category.',
+            downloading: /*[[#{historyExport.downloading}]]*/ 'Generating...'
+        },
+        task: {
+            completedStatus: /*[[#{task.completedStatus}]]*/ 'Completed task',
+            reminder: /*[[#{task.reminder}]]*/ 'Reminder',
+            actionDate: /*[[#{task.actionDate}]]*/ 'Action date',
+            markCompleted: /*[[#{task.markCompleted}]]*/ 'Mark complete',
+            openReminder: /*[[#{task.openReminder}]]*/ 'Open reminder',
+            dateInvalid: /*[[#{task.dateInvalid}]]*/ 'Enter a valid date in dd/MM/yyyy format.',
+            empty: /*[[#{task.empty}]]*/ 'No tasks yet.',
+            saveError: /*[[#{task.saveError}]]*/ 'Could not create the task.',
+            completeError: /*[[#{task.completeError}]]*/ 'Could not complete the task.',
+            loadError: /*[[#{task.loadError}]]*/ 'Could not load the tasks.',
+            deleteError: /*[[#{task.deleteError}]]*/ 'Could not delete the reminder.',
+            updateError: /*[[#{task.updateError}]]*/ 'Could not update the reminder.',
+            confirmDelete: /*[[#{task.confirmDelete}]]*/ 'Delete this reminder?',
+            edit: /*[[#{task.edit}]]*/ 'Edit',
+            saveChanges: /*[[#{task.saveChanges}]]*/ 'Save changes',
+            delete: /*[[#{task.delete}]]*/ 'Delete',
+            detailError: /*[[#{task.detailError}]]*/ 'Could not load reminder details.',
+            completionError: /*[[#{task.completeError}]]*/ 'Could not complete the task.',
+            requiredField: /*[[#{task.requiredField}]]*/ 'This field is required.',
+            parameterRequired: /*[[#{js.validation.parameterRequired}]]*/ 'Enter at least one parameter.',
+            eventTypes: {
+                info: /*[[#{task.event.info}]]*/ 'Information',
+                live: /*[[#{task.event.live}]]*/ 'Fish or plants',
+                manteiment: /*[[#{task.event.maintenance}]]*/ 'Maintenance',
+                parameters: /*[[#{task.event.parameters}]]*/ 'Parameters',
+                co2: /*[[#{task.event.co2}]]*/ 'CO2 treatment',
+                photo: /*[[#{task.event.photo}]]*/ 'Photo'
+            }
+        },
+        upcoming: {
+            noDate: /*[[#{events.noDate}]]*/ 'No date configured',
+            loadError: /*[[#{events.loadError}]]*/ 'Could not load upcoming events'
+        },
+        life: {
+            title: /*[[#{life.title}]]*/ 'Aquarium life',
+            empty: /*[[#{life.empty}]]*/ 'No fish or plants have been registered yet.',
+            loading: /*[[#{life.loading}]]*/ 'Loading aquarium life...',
+            loadError: /*[[#{life.loadError}]]*/ 'Could not load aquarium life.',
+            saveError: /*[[#{life.saveError}]]*/ 'Could not register the life form.',
+            quantityError: /*[[#{life.quantityError}]]*/ 'Could not update the quantity.',
+            fish: /*[[#{life.fish}]]*/ 'Fish',
+            plant: /*[[#{life.plant}]]*/ 'Plant',
+            scientificName: /*[[#{life.scientificName}]]*/ 'Scientific name',
+            quantity: /*[[#{life.quantity}]]*/ 'Quantity',
+            recommendedParameters: /*[[#{life.recommendedParameters}]]*/ 'Recommended parameters',
+            technicalSheetUrl: /*[[#{life.technicalSheetUrl}]]*/ 'Technical sheet',
+            notes: /*[[#{life.notes}]]*/ 'Notes',
+            addOne: /*[[#{life.addOne}]]*/ 'Add one',
+            removeOne: /*[[#{life.removeOne}]]*/ 'Remove one',
+            quantityLabel: /*[[#{life.quantityLabel}]]*/ 'Units'
+        },
+        confirm: {
+            deleteEvent:        /*[[#{js.confirm.deleteEvent}]]*/        'Delete this event?',
+            deletePhoto:        /*[[#{js.confirm.deletePhoto}]]*/        'Delete this photo?',
+            deleteNotification: /*[[#{js.confirm.deleteNotification}]]*/ 'Delete this notification?',
+            deleteRange:        /*[[#{js.confirm.deleteRange}]]*/        'Delete this parameter range?'
+        },
+        error: {
+            loadEvents:      /*[[#{js.error.loadEvents}]]*/      'Error loading events from the database',
+            load:            /*[[#{js.error.load}]]*/            'Error loading',
+            loadParameters:  /*[[#{js.error.loadParameters}]]*/  'Error loading parameters',
+            loadRanges:      /*[[#{js.error.loadRanges}]]*/      'Error loading ranges',
+            save:            /*[[#{js.error.save}]]*/            'Error saving',
+            delete:          /*[[#{js.error.delete}]]*/          'Error deleting',
+            upload:          /*[[#{js.error.upload}]]*/          'Upload error',
+            deleteNotification: /*[[#{js.error.deleteNotification}]]*/ 'Error deleting notification',
+            deleteRange:      /*[[#{js.error.deleteRange}]]*/      'Error deleting parameter range',
+            loadParameterRanges: /*[[#{js.error.loadParameterRanges}]]*/ 'Error loading parameter ranges',
+            saveInfo:         /*[[#{js.error.saveInfo}]]*/         'Error saving information',
+            saveNotification: /*[[#{js.error.saveNotification}]]*/ 'Error saving notification',
+            saveRange:        /*[[#{js.error.saveRange}]]*/        'Error saving parameter range',
+            loadPhotos:      /*[[#{js.error.loadPhotos}]]*/      'Error loading photos',
+            nextEvent:       /*[[#{js.error.nextEvent}]]*/       'Error loading the next event'
+        },
+        success: {
+            treatmentSaved:      /*[[#{js.success.treatmentSaved}]]*/      'Treatment saved successfully.',
+            parametersSaved:     /*[[#{js.success.parametersSaved}]]*/     'Parameters saved successfully.',
+            maintenanceSaved:    /*[[#{js.success.maintenanceSaved}]]*/    'Maintenance saved successfully.',
+            infoSaved:           /*[[#{js.success.infoSaved}]]*/           'Information saved successfully.',
+            photoSaved:          /*[[#{js.success.photoSaved}]]*/          'Photo saved successfully.',
+            notificationUpdated:/*[[#{js.success.notificationUpdated}]]*/ 'Notification updated.',
+            notificationCreated:/*[[#{js.success.notificationCreated}]]*/ 'Notification created.',
+            rangeUpdated:        /*[[#{js.success.rangeUpdated}]]*/        'Range updated.',
+            rangeCreated:        /*[[#{js.success.rangeCreated}]]*/        'Range created successfully.'
+        },
+        validation: {
+            nameValueRequired:      /*[[#{js.validation.nameValueRequired}]]*/      'Name and value are required.',
+            parameterDaysRequired:  /*[[#{js.validation.parameterDaysRequired}]]*/  'Parameter and days are required.',
+            parameterNameRequired:  /*[[#{js.validation.parameterNameRequired}]]*/  'Parameter name is required',
+            selectPhoto:            /*[[#{js.validation.selectPhoto}]]*/            'Select a photo.'
+        },
+        feedback: {
+            parameterAndDaysRequired: /*[[#{js.validation.parameterDaysRequired}]]*/ 'Parameter and days are required.'
+        },
+        button: {
+            saving:   /*[[#{js.button.saving}]]*/   'Saving...',
+            save:     /*[[#{label.guardar}]]*/     'Save',
+            uploading:/*[[#{js.button.uploading}]]*/'Uploading...'
+        },
+        label: {
+            editNotification: /*[[#{js.label.editNotification}]]*/ 'Edit notification',
+            newNotification:  /*[[#{js.label.newNotification}]]*/  'New notification',
+            editRange:        /*[[#{js.label.editRange}]]*/        'Edit range',
+            newRange:         /*[[#{js.label.newRange}]]*/         'New range',
+            datePrefix:       /*[[#{js.label.datePrefix}]]*/       'Date:',
+            noData:           /*[[#{js.label.noData}]]*/           'No data',
+            noPhotos:         /*[[#{js.label.noPhotos}]]*/         'No photos',
+            yes:              /*[[#{js.label.yes}]]*/              'Yes',
+            no:               /*[[#{js.label.no}]]*/               'No',
+            co2Treatments:    /*[[#{js.label.co2Treatments}]]*/    'Tratamientos Co2',
+            days:             /*[[#{js.label.days}]]*/             'days',
+            vencido:          /*[[#{events.proximos.estado.vencido}]]*/          'Overdue',
+            hoy:              /*[[#{events.proximos.estado.hoy}]]*/          'Today',
+            manana:           /*[[#{events.proximos.estado.manana}]]*/          'Tomorrow',
+            diaAbrev:         /*[[#{events.proximo.diaAbrev}]]*/          'd',
+            noEvent:          /*[[#{events.noEvent}]]*/           'No events configured',
+            healthy:          /*[[#{parameters.status.healthy}]]*/ 'Healthy',
+            issue:            /*[[#{parameters.status.issue}]]*/ 'Issue',
+
+            selectPhoto:     /*[[#{js.validation.selectPhoto}]]*/     'Select a photo',
+            aguaCambiada:     /*[[#{modal.mantenimiento.agua}]]*/     'Water changed',
+            prime:   /*[[#{modal.mantenimiento.prime}]]*/     'Prime',
+            observaciones:   /*[[#{modal.mantenimiento.observaciones}]]*/     'Observations',
+            podas:  /*[[#{modal.mantenimiento.poda}]]*/     'Pruning',
+            vidrio:     /*[[#{modal.mantenimiento.cristales}]]*/     'Glass',
+            filtro1:    /*[[#{modal.mantenimiento.filtro1}]]*/     'Filter 1',
+            filtro2:    /*[[#{modal.mantenimiento.filtro2}]]*/     'Filter 2',
+            noClean:    /*[[#{js.label.noClean}]]*/     'No cleaning',
+            perlon:     /*[[#{js.label.perlon}]]*/     'Perlon',
+            esponja:   /*[[#{js.label.esponja}]]*/     'Sponge',
+            biologico:      /*[[#{js.label.biologico}]]*/     'Biological',
+            mecanico:   /*[[#{js.label.mecanico}]]*/     'Mechanical',
+            bioMeca:    /*[[#{js.label.bioMeca}]]*/     'Bio-Mechanical',
+            anterior:   /*[[#{label.anterior}]]*/     'Previous',
+            siguiente:  /*[[#{label.siguiente}]]*/     'Next'
+        }
+    };
+</script>
+<script th:src="@{/gestion.js}" type="module"></script>
+
+</body>
+</html>

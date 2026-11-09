@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+
+<th:block th:replace="~{fragments/static :: header-scripts}"></th:block>
+<th:block th:replace="~{fragments/static :: style}"></th:block>
+
+<body>
+<div th:replace="~{fragments/static :: header}"></div>
+
+<main class="container-fluid mt-4 px-4 pb-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 mb-0" th:text="#{aquarium.title}">Acuario</h1>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary" id="aquarium-count">0</span>
+                    <button type="button" class="btn btn-success"
+                            data-bs-toggle="modal" data-bs-target="#aquarium-create-modal"
+                            th:text="#{aquarium.create}">
+                        Crear acuario
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <div class="alert alert-danger d-none mb-3" id="aquarium-load-error" role="alert"></div>
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th th:text="#{aquarium.name}">Nombre</th>
+                        <th th:text="#{aquarium.type}">Tipo</th>
+                        <th th:text="#{aquarium.filters}">Filtros</th>
+                        <th th:text="#{aquarium.details}">Información</th>
+                    </tr>
+                    </thead>
+                    <tbody id="aquarium-list">
+                    <tr id="aquarium-empty-row">
+                        <td colspan="4" class="text-center text-muted" th:text="#{aquarium.empty}">
+                            No hay acuarios configurados
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="aquarium-create-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" th:text="#{aquarium.create}">Crear acuario</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <form id="aquarium-create-form" method="post">
+                <div class="modal-body">
+                    <h3 class="h6" th:text="#{aquarium.general}">Información general</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" th:text="#{aquarium.name}">Nombre</label>
+                            <input class="form-control" name="name" required maxlength="150">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" th:text="#{aquarium.type}">Tipo</label>
+                            <input class="form-control" name="type">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" th:text="#{aquarium.volume}">Volumen</label>
+                            <input class="form-control" name="volume" type="number" min="0" max="99999999.99" step="0.01">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" th:text="#{aquarium.glassThickness}">Grosor del cristal</label>
+                            <input class="form-control" name="glassThickness">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" th:text="#{aquarium.size}">Tamaño</label>
+                            <input class="form-control" name="size">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" th:text="#{aquarium.heater}">Calentador</label>
+                            <input class="form-control" name="heater">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" th:text="#{aquarium.light}">Luz</label>
+                            <input class="form-control" name="light">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" th:text="#{aquarium.substrate}">Sustrato</label>
+                            <input class="form-control" name="substrate">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                        <h3 class="h6 mb-0" th:text="#{aquarium.filters}">Filtros</h3>
+                        <button type="button" id="aquarium-create-add-filter" class="btn btn-outline-success btn-sm"
+                                th:text="#{aquarium.addFilter}">Añadir filtro</button>
+                    </div>
+                    <div id="aquarium-create-filters" class="d-grid gap-3"></div>
+                    <template id="aquarium-create-filter-template">
+                        <fieldset class="card aquarium-create-filter">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <legend class="h6 mb-0" th:text="#{aquarium.filter}">Filtro</legend>
+                                    <button type="button" class="btn btn-outline-danger btn-sm aquarium-create-remove-filter"
+                                            th:text="#{label.borrar}">Eliminar</button>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" th:text="#{aquarium.filterName}">Nombre del filtro</label>
+                                        <input class="form-control" name="name">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" th:text="#{aquarium.biological}">Material biológico</label>
+                                        <input class="form-control" name="materialBiological">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" th:text="#{aquarium.mechanical}">Material mecánico</label>
+                                        <input class="form-control" name="materialMechanical">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" th:text="#{aquarium.bioMechanical}">Material bio-mecánico</label>
+                                        <input class="form-control" name="materialBioMechanical">
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-4 mt-3">
+                                    <label><input type="checkbox" class="form-check-input me-1" name="sponge">
+                                        <span th:text="#{aquarium.sponge}">Esponja</span></label>
+                                    <label><input type="checkbox" class="form-check-input me-1" name="carbonActive">
+                                        <span th:text="#{aquarium.carbonActive}">Carbón activo</span></label>
+                                    <label><input type="checkbox" class="form-check-input me-1" name="perlon">
+                                        <span th:text="#{aquarium.perlon}">Perlón</span></label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </template>
+                    <div class="alert alert-danger d-none mt-3" id="aquarium-create-error" role="alert"
+                         th:data-save-error="#{aquarium.validation.saveError}"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            th:text="#{label.cancelar}">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" th:text="#{aquarium.create}">Crear acuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aquarium-details-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="aquarium-details-title"></h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-primary btn-sm" id="aquarium-details-edit"
+                            th:text="#{aquarium.edit}">Editar acuario</button>
+                </div>
+                <h3 class="h6" th:text="#{aquarium.general}">Información general</h3>
+                <dl class="row" id="aquarium-details-fields"></dl>
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                    <h3 class="h6 mb-0" th:text="#{aquarium.filters}">Filtros</h3>
+                    <button type="button" class="btn btn-success btn-sm" id="aquarium-details-add-filter"
+                            th:text="#{aquarium.addFilter}">Añadir filtro</button>
+                </div>
+                <div id="aquarium-details-filters"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aquarium-edit-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" th:text="#{aquarium.edit}">Editar acuario</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <form id="aquarium-edit-form">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.name}">Nombre</label><input class="form-control" name="name" required maxlength="150"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.type}">Tipo</label><input class="form-control" name="type"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.volume}">Volumen</label><input class="form-control" name="volume" type="number" min="0" max="99999999.99" step="0.01"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.glassThickness}">Cristal</label><input class="form-control" name="glassThickness"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.size}">Tamaño</label><input class="form-control" name="size"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.heater}">Calentador</label><input class="form-control" name="heater"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.light}">Luz</label><input class="form-control" name="light"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.substrate}">Sustrato</label><input class="form-control" name="substrate"></div>
+                    </div>
+                    <div class="alert alert-danger d-none mt-3 form-error" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            th:text="#{label.cancelar}">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" th:text="#{label.guardar}">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aquarium-filter-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="aquarium-filter-title" th:text="#{aquarium.addFilter}">Añadir filtro</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <form id="aquarium-filter-form">
+                <input type="hidden" name="filterId">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.filterName}">Nombre</label><input class="form-control" name="name" maxlength="50"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.biological}">Material biológico</label><input class="form-control" name="materialBiological" maxlength="255"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.mechanical}">Material mecánico</label><input class="form-control" name="materialMechanical" maxlength="255"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.bioMechanical}">Material bio-mecánico</label><input class="form-control" name="materialBioMechanical" maxlength="255"></div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-4 mt-3">
+                        <label><input type="checkbox" class="form-check-input me-1" name="sponge"> <span th:text="#{aquarium.sponge}">Esponja</span></label>
+                        <label><input type="checkbox" class="form-check-input me-1" name="carbonActive"> <span th:text="#{aquarium.carbonActive}">Carbón activo</span></label>
+                        <label><input type="checkbox" class="form-check-input me-1" name="perlon"> <span th:text="#{aquarium.perlon}">Perlón</span></label>
+                    </div>
+                    <div class="alert alert-danger d-none mt-3 form-error" role="alert"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            th:text="#{label.cancelar}">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" th:text="#{label.guardar}">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="aquarium-ui-labels" hidden
+     th:data-empty="#{aquarium.empty}"
+     th:data-delete-confirm="#{aquarium.deleteConfirm}"
+     th:data-management="#{aquarium.management}"
+     th:data-edit="#{aquarium.edit}"
+     th:data-edit-filter="#{aquarium.edit}"
+     th:data-view-details="#{aquarium.viewDetails}"
+     th:data-delete="#{aquarium.delete}"
+     th:data-general="#{aquarium.general}"
+     th:data-filters="#{aquarium.filters}"
+     th:data-filter="#{aquarium.filter}"
+     th:data-no-filters="#{aquarium.noFilters}"
+     th:data-id="#{aquarium.id}"
+     th:data-name="#{aquarium.name}"
+     th:data-type="#{aquarium.type}"
+     th:data-volume="#{aquarium.volume}"
+     th:data-glass-thickness="#{aquarium.glassThickness}"
+     th:data-size="#{aquarium.size}"
+     th:data-heater="#{aquarium.heater}"
+     th:data-light="#{aquarium.light}"
+     th:data-substrate="#{aquarium.substrate}"
+     th:data-created-at="#{aquarium.createdAt}"
+     th:data-updated-at="#{aquarium.updatedAt}"
+     th:data-biological="#{aquarium.biological}"
+     th:data-mechanical="#{aquarium.mechanical}"
+     th:data-bio-mechanical="#{aquarium.bioMechanical}"
+     th:data-sponge="#{aquarium.sponge}"
+     th:data-carbon-active="#{aquarium.carbonActive}"
+     th:data-perlon="#{aquarium.perlon}"
+     th:data-yes="#{js.label.yes}"
+     th:data-no="#{js.label.no}"
+     th:data-add-filter="#{aquarium.addFilter}"
+     th:data-save-error="#{aquarium.validation.saveError}"
+     th:data-cancel="#{label.cancelar}"
+     th:data-save="#{label.guardar}"
+     th:data-close="#{label.cerrar}"
+     th:data-delete-filter="#{label.borrar}"></div>
+
+<div th:if="${false}" class="modal fade"
+     th:id="${'aquarium-modal-' + aquarium.id}" tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" th:text="${aquarium.name}">Acuario</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        th:aria-label="#{label.cerrar}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            th:attr="data-bs-target=${'#aquarium-edit-modal-' + aquarium.id}"
+                            data-bs-dismiss="modal"
+                            th:text="#{aquarium.edit}">
+                        Editar acuario
+                    </button>
+                </div>
+                <h3 class="h6" th:text="#{aquarium.general}">Información general</h3>
+                <dl class="row">
+                    <dt class="col-sm-4" th:text="#{aquarium.id}">ID</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.id}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.type}">Tipo</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.type ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.volume}">Volumen</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.volume != null ? aquarium.volume + ' L' : '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.glassThickness}">Grosor del cristal</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.glassThickness ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.size}">Tamaño</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.size ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.heater}">Calentador</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.heater ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.light}">Luz</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.light ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.substrate}">Sustrato</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.substrate ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.createdAt}">Creado</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.createdAt ?: '-'}">-</dd>
+                    <dt class="col-sm-4" th:text="#{aquarium.updatedAt}">Actualizado</dt>
+                    <dd class="col-sm-8" th:text="${aquarium.updatedAt ?: '-'}">-</dd>
+                </dl>
+
+                <h3 class="h6 mt-4" th:text="#{aquarium.filters}">Filtros</h3>
+                <div class="d-flex justify-content-end mb-2">
+                    <button type="button" class="btn btn-success btn-sm aquarium-add-filter"
+                            data-bs-toggle="modal"
+                            th:attr="data-bs-target='#filter-form-modal-' + ${aquarium.id}"
+                            th:data-aquarium-id="${aquarium.id}"
+                            th:text="#{aquarium.addFilter}">
+                        Añadir filtro
+                    </button>
+                </div>
+                <div th:if="${#lists.isEmpty(aquarium.filters)}" class="text-muted"
+                     th:text="#{aquarium.noFilters}">Sin filtros configurados</div>
+                <div th:each="filter : ${aquarium.filters}" class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="h6 mb-3" th:text="${filter.name ?: #messages.msg('aquarium.filter')}">Filtro</h4>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm aquarium-edit-filter"
+                                        data-bs-toggle="modal"
+                                        th:attr="data-bs-target='#filter-form-modal-' + ${aquarium.id}"
+                                        th:data-filter-id="${filter.id}"
+                                        th:data-name="${filter.name}"
+                                        th:data-biological="${filter.materialBiological}"
+                                        th:data-mechanical="${filter.materialMechanical}"
+                                        th:data-bio-mechanical="${filter.materialBioMechanical}"
+                                        th:data-sponge="${filter.sponge}"
+                                        th:data-carbon-active="${filter.carbonActive}"
+                                        th:data-perlon="${filter.perlon}"
+                                        th:text="#{aquarium.edit}">
+                                    Editar
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm aquarium-delete-filter"
+                                        th:data-filter-id="${filter.id}"
+                                        th:text="#{label.borrar}">
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-6" th:text="#{aquarium.id}">ID</dt>
+                            <dd class="col-sm-6" th:text="${filter.id}">-</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.biological}">Material biológico</dt>
+                            <dd class="col-sm-6" th:text="${filter.materialBiological ?: '-'}">-</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.mechanical}">Material mecánico</dt>
+                            <dd class="col-sm-6" th:text="${filter.materialMechanical ?: '-'}">-</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.bioMechanical}">Material bio-mecánico</dt>
+                            <dd class="col-sm-6" th:text="${filter.materialBioMechanical ?: '-'}">-</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.sponge}">Esponja</dt>
+                            <dd class="col-sm-6" th:text="${filter.sponge ? #messages.msg('js.label.yes') : #messages.msg('js.label.no')}">No</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.carbonActive}">Carbón activo</dt>
+                            <dd class="col-sm-6" th:text="${filter.carbonActive ? #messages.msg('js.label.yes') : #messages.msg('js.label.no')}">No</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.perlon}">Perlón</dt>
+                            <dd class="col-sm-6" th:text="${filter.perlon ? #messages.msg('js.label.yes') : #messages.msg('js.label.no')}">No</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.createdAt}">Creado</dt>
+                            <dd class="col-sm-6" th:text="${filter.createdAt ?: '-'}">-</dd>
+                            <dt class="col-sm-6" th:text="#{aquarium.updatedAt}">Actualizado</dt>
+                            <dd class="col-sm-6" th:text="${filter.updatedAt ?: '-'}">-</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:if="${false}" class="modal fade"
+     th:id="${'aquarium-edit-modal-' + aquarium.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" th:text="#{aquarium.edit}">Editar acuario</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form class="aquarium-form" method="post" th:data-aquarium-id="${aquarium.id}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.name}">Nombre</label><input class="form-control" name="name" required maxlength="150" th:value="${aquarium.name}"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.type}">Tipo</label><input class="form-control" name="type" th:value="${aquarium.type}"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.volume}">Volumen</label><input class="form-control" name="volume" type="number" min="0" max="99999999.99" step="0.01" th:value="${aquarium.volume}"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.glassThickness}">Cristal</label><input class="form-control" name="glassThickness" th:value="${aquarium.glassThickness}"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.size}">Tamaño</label><input class="form-control" name="size" th:value="${aquarium.size}"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.heater}">Calentador</label><input class="form-control" name="heater" th:value="${aquarium.heater}"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.light}">Luz</label><input class="form-control" name="light" th:value="${aquarium.light}"></div>
+                        <div class="col-md-4"><label class="form-label" th:text="#{aquarium.substrate}">Sustrato</label><input class="form-control" name="substrate" th:value="${aquarium.substrate}"></div>
+                    </div>
+                    <div class="alert alert-danger d-none mt-3 form-error"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cancelar}">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" th:text="#{label.guardar}">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${false}" class="modal fade"
+     th:id="${'filter-form-modal-' + aquarium.id}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title fs-5 filter-modal-title" th:text="#{aquarium.addFilter}">Añadir filtro</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form class="filter-form" method="post" th:data-aquarium-id="${aquarium.id}">
+                <input type="hidden" name="filterId">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.filterName}">Nombre</label><input class="form-control" name="name"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.biological}">Material biológico</label><input class="form-control" name="materialBiological"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.mechanical}">Material mecánico</label><input class="form-control" name="materialMechanical"></div>
+                        <div class="col-md-6"><label class="form-label" th:text="#{aquarium.bioMechanical}">Material bio-mecánico</label><input class="form-control" name="materialBioMechanical"></div>
+                    </div>
+                    <div class="d-flex gap-4 mt-3">
+                        <label><input type="checkbox" class="form-check-input me-1" name="sponge"> <span th:text="#{aquarium.sponge}">Esponja</span></label>
+                        <label><input type="checkbox" class="form-check-input me-1" name="carbonActive"> <span th:text="#{aquarium.carbonActive}">Carbón activo</span></label>
+                        <label><input type="checkbox" class="form-check-input me-1" name="perlon"> <span th:text="#{aquarium.perlon}">Perlón</span></label>
+                    </div>
+                    <div class="alert alert-danger d-none mt-3 form-error"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{label.cancelar}">Cancelar</button><button type="submit" class="btn btn-primary" th:text="#{label.guardar}">Guardar</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/static :: footer}"></div>
+<script th:remove="all">
+    document.addEventListener('DOMContentLoaded', function () {
+        function send(url, method, data) {
+            return fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(function (response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response;
+            });
+        }
+
+        var createAquariumForm = document.getElementById('aquarium-create-form');
+        var createFilterContainer = document.getElementById('aquarium-create-filters');
+        var createFilterTemplate = document.getElementById('aquarium-create-filter-template');
+        var createAquariumError = document.getElementById('aquarium-create-error');
+
+        document.getElementById('aquarium-create-add-filter').addEventListener('click', function () {
+            createFilterContainer.appendChild(createFilterTemplate.content.cloneNode(true));
+        });
+
+        createFilterContainer.addEventListener('click', function (event) {
+            var removeButton = event.target.closest('.aquarium-create-remove-filter');
+            if (removeButton) {
+                removeButton.closest('.aquarium-create-filter').remove();
+            }
+        });
+
+        createAquariumForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            createAquariumError.classList.add('d-none');
+
+            var formData = new FormData(createAquariumForm);
+            var request = {
+                name: formData.get('name'),
+                type: formData.get('type') || null,
+                volume: formData.get('volume') ? Number(formData.get('volume')) : null,
+                glassThickness: formData.get('glassThickness') || null,
+                size: formData.get('size') || null,
+                heater: formData.get('heater') || null,
+                light: formData.get('light') || null,
+                substrate: formData.get('substrate') || null,
+                filters: Array.from(createFilterContainer.querySelectorAll('.aquarium-create-filter'))
+                    .map(function (filterElement) {
+                        var filterData = new FormData();
+                        filterElement.querySelectorAll('input[name]').forEach(function (input) {
+                            if (input.type === 'checkbox') {
+                                filterData.set(input.name, input.checked);
+                            } else {
+                                filterData.set(input.name, input.value);
+                            }
+                        });
+                        return {
+                            name: filterData.get('name') || null,
+                            materialBiological: filterData.get('materialBiological') || null,
+                            materialMechanical: filterData.get('materialMechanical') || null,
+                            materialBioMechanical: filterData.get('materialBioMechanical') || null,
+                            sponge: filterData.get('sponge') === 'true',
+                            carbonActive: filterData.get('carbonActive') === 'true',
+                            perlon: filterData.get('perlon') === 'true'
+                        };
+                    })
+            };
+
+            send('/api/aquariums', 'POST', request)
+                .then(function () { window.location.reload(); })
+                .catch(function (error) {
+                    createAquariumError.textContent = error.message;
+                    createAquariumError.classList.remove('d-none');
+                });
+        });
+
+        document.querySelectorAll('.aquarium-form').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var data = Object.fromEntries(new FormData(form).entries());
+                data.volume = data.volume ? Number(data.volume) : null;
+                send('/api/aquariums/' + form.dataset.aquariumId, 'PUT', data)
+                    .then(function () { window.location.reload(); })
+                    .catch(function (error) { form.querySelector('.form-error').textContent = error.message; form.querySelector('.form-error').classList.remove('d-none'); });
+            });
+        });
+
+        function resetFilterForm(form) {
+            form.reset();
+            form.elements.filterId.value = '';
+            form.closest('.modal').querySelector('.filter-modal-title').textContent = 'Añadir filtro';
+        }
+
+        document.querySelectorAll('.aquarium-add-filter').forEach(function (button) {
+            button.addEventListener('click', function () {
+                resetFilterForm(document.querySelector('#filter-form-modal-' + button.dataset.aquariumId + ' form'));
+            });
+        });
+
+        document.querySelectorAll('.aquarium-edit-filter').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var form = button.closest('div.modal')?.querySelector('.filter-form');
+                resetFilterForm(form);
+                form.elements.filterId.value = button.dataset.filterId;
+                form.elements.name.value = button.dataset.name || '';
+                form.elements.materialBiological.value = button.dataset.biological || '';
+                form.elements.materialMechanical.value = button.dataset.mechanical || '';
+                form.elements.materialBioMechanical.value = button.dataset.bioMechanical || '';
+                form.elements.sponge.checked = button.dataset.sponge === 'true';
+                form.elements.carbonActive.checked = button.dataset.carbonActive === 'true';
+                form.elements.perlon.checked = button.dataset.perlon === 'true';
+                form.closest('.modal').querySelector('.filter-modal-title').textContent = 'Editar filtro';
+            });
+        });
+
+        document.querySelectorAll('.filter-form').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var values = Object.fromEntries(new FormData(form).entries());
+                var filterId = values.filterId;
+                delete values.filterId;
+                values.sponge = form.elements.sponge.checked;
+                values.carbonActive = form.elements.carbonActive.checked;
+                values.perlon = form.elements.perlon.checked;
+                var url = filterId
+                    ? '/api/aquariums/' + form.dataset.aquariumId + '/filters/' + filterId
+                    : '/api/aquariums/' + form.dataset.aquariumId + '/filters';
+                send(url, filterId ? 'PUT' : 'POST', values)
+                    .then(function () { window.location.reload(); })
+                    .catch(function (error) { form.querySelector('.form-error').textContent = error.message; form.querySelector('.form-error').classList.remove('d-none'); });
+            });
+        });
+
+        document.querySelectorAll('.aquarium-delete-filter').forEach(function (button) {
+            button.addEventListener('click', function () {
+                if (!window.confirm('¿Eliminar este filtro?')) return;
+                send('/api/aquariums/' + button.dataset.aquariumId
+                    + '/filters/' + button.dataset.filterId, 'DELETE')
+                    .then(function () { window.location.reload(); })
+                    .catch(function (error) { window.alert(error.message); });
+            });
+        });
+
+        document.querySelectorAll('.aquarium-delete').forEach(function (button) {
+            button.addEventListener('click', function () {
+                if (!window.confirm(button.dataset.confirm + '\n\n' + button.dataset.aquariumName)) return;
+                fetch('/api/aquariums/' + encodeURIComponent(button.dataset.aquariumId), {
+                    method: 'DELETE'
+                })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        window.location.reload();
+                    })
+                    .catch(function (error) {
+                        window.alert(error.message);
+                    });
+            });
+        });
+
+        fetch('/api/notifications')
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function (notifications) {
+                var items = notifications || [];
+                var wrapper = document.getElementById('notif-bell-wrapper');
+                var badge = document.getElementById('notif-bell-badge');
+                var list = document.getElementById('notif-bell-list');
+
+                if (!wrapper || !badge || !list || items.length === 0) {
+                    return;
+                }
+
+                badge.textContent = items.length;
+                list.innerHTML = items.map(function (notification) {
+                    return '<li><div class="dropdown-item d-flex justify-content-between py-2 border-bottom">' +
+                        '<span class="fw-bold">' + escapeHtml(notification.aquariumName || '-') + ':</span>' +
+                        '<span class="text-muted small ms-2">' +
+                        escapeHtml(notification.parameter || '-') + ': ' +
+                        escapeHtml(notification.value || '-') + '</span>' +
+                        '</div></li>';
+                }).join('');
+                wrapper.classList.remove('d-none');
+            })
+            .catch(function (error) {
+                console.error('No se pudieron cargar las notificaciones', error);
+            });
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, function (character) {
+                return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[character];
+            });
+        }
+    });
+</script>
+<script th:src="@{/aquarium-list.js}" defer></script>
+</body>
+</html>

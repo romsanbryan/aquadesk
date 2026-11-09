@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest an improvement or new capability
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting, check whether this idea has already been discussed.
+        Do not include credentials, personal information, or real aquarium data.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or need
+      description: What problem would this feature solve?
+      placeholder: Describe the user need and who would benefit.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you would like AquaDesk to work.
+    validations:
+      required: true
+  - type: dropdown
+    id: aquarium-scope
+    attributes:
+      label: Aquarium scope
+      description: Would this feature operate on one aquarium or across aquariums?
+      options:
+        - One aquarium
+        - Multiple aquariums
+        - Not applicable or unsure
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any alternative solutions or workflows you have considered.
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: List outcomes that would make this feature complete.

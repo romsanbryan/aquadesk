@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible problem with AquaDesk
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting, check whether this issue has already been reported.
+        Never include credentials, personal information, or real aquarium data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+      description: Describe what is going wrong.
+      placeholder: A clear, concise description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the steps needed to reproduce the problem.
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: aquarium-scope
+    attributes:
+      label: Aquarium scope
+      description: Does this affect one aquarium or data across aquariums?
+      options:
+        - One aquarium
+        - Multiple aquariums
+        - Not applicable or unsure
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include relevant AquaDesk, browser, operating system, or database versions.
+      placeholder: Omit credentials, hostnames, and personal data.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Add sanitized logs or screenshots if they help explain the problem.
+      placeholder: Remove tokens, passwords, personal information, and real aquarium data before posting.
